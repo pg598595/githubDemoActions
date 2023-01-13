@@ -1,4 +1,4 @@
-name: Github Workflow Demo
+name: Github Workflow Demo 1
 
 on:
   push:
