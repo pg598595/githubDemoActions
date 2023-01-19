@@ -17,7 +17,7 @@ on:
     branches:
     - main
 
-name: Build and Deploy to Cloud Run
+name: Build and Deploy to Cloud Run To GCP
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   SERVICE: helloworld-nodejs
