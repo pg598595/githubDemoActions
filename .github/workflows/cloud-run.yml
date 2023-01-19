@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+name: Build and Deploy to Cloud Run To GCP
 
 on:
   push:
     branches:
     - main
 
-name: Build and Deploy to Cloud Run To GC
 
 
 
@@ -30,22 +30,22 @@ jobs:
       runs-on: ubuntu-latest
 
 
-  permissions:
-    contents: 'read'
-    id-token: 'write'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
-  steps:
-  - uses: 'actions/checkout@v3'
+    steps:
+    - uses: 'actions/checkout@v3'
 
-  - uses: 'google-github-actions/auth@v1'
-    with:
-      credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+    - uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
 
-  - id: 'deploy'
-    uses: 'google-github-actions/deploy-cloudrun@v1'
-    with:
-      service: 'hello-cloud-run'
-      image: 'gcr.io/cloudrun/hello'
+    - id: 'deploy'
+      uses: 'google-github-actions/deploy-cloudrun@v1'
+      with:
+        service: 'hello-cloud-run'
+        image: 'gcr.io/cloudrun/hello'
 
-  - name: 'Use output'
-    run: 'curl "${{ steps.deploy.outputs.url }}"'
+    - name: 'Use output'
+      run: 'curl "${{ steps.deploy.outputs.url }}"'
