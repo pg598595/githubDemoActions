@@ -36,29 +36,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    # Configure Workload Identity Federation and generate an access token.
-    # - id: 'auth'
-    #   name: 'Authenticate to Google Cloud'
-    #   uses: 'google-github-actions/auth@v1'
-    #   with:
-    #     workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-    #     service_account: 'service-720727016943@serverless-robot-prod.iam.gserviceaccount.com'
-
-    
-    - id: auth
+    - id: 'auth'
       name: 'Authenticate to Google Cloud'
-      uses: google-github-actions/auth@v0.4.0
+      uses: 'google-github-actions/auth@v0.4.0'
       with:
         credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
-        
-    - id: get-gke-credentials
-      uses: google-github-actions/get-gke-credentials@v0.4.0
-      with:
-        cluster_name: my-cluster
-        location: us-central1-a
-
-    - id: get-pods
-      run: kubectl get pods
+ 
 
     # Alternative option - authentication via credentials json
     # - id: 'auth'
