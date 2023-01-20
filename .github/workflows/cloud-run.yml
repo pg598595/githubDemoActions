@@ -36,7 +36,6 @@ jobs:
           run: docker run --detach --publish 5000:80
 
         - name: Push Docker image
-          uses:
           run: docker push $IMAGE_NAME
 
         - name: Deploy Docker image
