@@ -1,7 +1,11 @@
-FROM node:alpine
+FROM node:14
 WORKDIR /usr/app/
 COPY package*.json ./
 RUN npm i
-RUN npm install --production
-COPY build .
-CMD ["node", "index.html","--port 8080"]
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Start the application
+CMD ["npm", "start"]
