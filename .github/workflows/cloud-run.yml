@@ -1,42 +1,45 @@
-name: Docker
+name: Build and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: 
+    - main
+
+
+env:
+  PROJECT_ID: ${{ secrets.RUN_PROJECT }}
+  RUN_REGION: us-central1
+  SERVICE_NAME: helloworld-python
 
 jobs:
+  setup-build-deploy:
+    name: Setup, Build , and Deploy
+    runs-on: ubuntu-latest
 
-    deploy:
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
 
-        name: Setup Gcloud Account
-        runs-on: ubuntu-latest
-        env:
-          IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GCP_APP_NAME }}
-        steps:
+    - uses: GoogleCloudPatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.RUN_SA_KEY }}
+        project_id: ${{ secrets.RUN_PROJECT }}
 
-        - name: Login
-          uses: google-github-actions/setup-gcloud@v0
-          with:
-            project_id: ${{ secrets.GCP_PROJECT_ID }}
-            service_account_email: ${{ secrets.GCP_EMAIL }}
-            service_account_key: ${{ secrets.GCP_CREDENTIALS }}
+    - name: Build
+      run: |-
+        gcloud builds submit \
+          --quiet \
+          --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
+    
+    - name: Deploy
+      run: |-
+        gcloud run deploy "$SERVICE_NAME" \
+          --quiet\
+          --region "$RUN_REGION" \
+          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+          --platform "managed" \
+          --allow-unauthenticated
 
-        - name: Configure Docker
-          run: gcloud auth configure-docker --quiet
 
-        - name: Checkout repository
-          uses: actions/checkout@v2
-
-        - name: Build Docker image
-          run: docker build . -t $IMAGE_NAME
-
-        - name: Test Docker image
-          run: docker run $IMAGE_NAME sh -c "node index.html"
-
-        - name: Push Docker image
-          run: docker push $IMAGE_NAME
-
-        - name: Deploy Docker image
-          run: gcloud run deploy ${{ secrets.GCP_PROJECT_ID }} --image $IMAGE_NAME --region us-central1 --platform managed
+    
