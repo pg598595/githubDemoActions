@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm i
 RUN npm install --production
 COPY build .
-CMD ["node", "index.html","--port 8000"]
+CMD ["node", "index.html","--port 5000"]
