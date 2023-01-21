@@ -40,50 +40,48 @@
 #           --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
 #           --platform "managed" \
 #           --allow-unauthenticated
-
-
-    
-name: Deploy to GCP
+name: Build and Deploy to Cloud Run
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+    PROJECT_ID: ${{ secrets.RUN_PROJECT }}
+    RUN_REGION: us-central1
+    SERVICE_NAME: super-simple-service
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    setup-build-deploy:
+        name: Setup, Build, and Deploy
+        runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+        steps:
+          - name: Login
+            uses: google-github-actions/setup-gcloud@v0
+            with:
+              project_id: ${{ secrets.RUN_PROJECT }}
+              service_account_email: ${{ secrets.SA_EMAIL }}
+              service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
+          - name: Checkout
+            uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: npm ci
+          - name: gcloud Set up
+            run: |
+                gcloud config set project $PROJECT_ID
 
-    - name: Build the app
-      run: npm run build
+          - name: Build
+            run: |
+                gcloud builds submit -t gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+                
+          - name: Deploy
+            run: |
+                gcloud run deploy $SERVICE_NAME \
+                  --region $RUN_REGION \
+                  --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+                  --platform managed
 
-    - name: Install and configure the Cloud SDK
-      run: |
-        sudo echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-        apt-get update && apt-get install google-cloud-sdk -y
-
-    - name: Authenticate with GCP
-      run: gcloud auth login --no-launch-browser
-
-    - name: Deploy to Cloud Run
-      run: gcloud run deploy "$SERVICE_NAME" --image-gcr-io/$PROJECT_ID/$SERVICE_NAME --platform managed --region us-central1 --quiet --config-file cloud-run.yml
-
-env:
-  GCLOUD_PROJECT: ${{ secrets.RUN_PROJECT }}
-  GCLOUD_CREDENTIALS: ${{ secrets.RUN_SA_KEY }}
-  PROJECT_ID: ${{ secrets.RUN_PROJECT }}
-  RUN_REGION: us-central1
-  SERVICE_NAME: helloworld-api
+    
