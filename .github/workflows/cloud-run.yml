@@ -83,7 +83,6 @@ jobs:
                   --region $RUN_REGION \
                   --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
                   --platform managed
-        options:
-          logging: CLOUD_LOGGING_ONLY
+
 
     
