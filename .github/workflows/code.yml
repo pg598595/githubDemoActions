@@ -16,7 +16,7 @@ jobs:
         run: npm install -g eslint
 
       - name: Run Lint
-        run: npm lint:fix
+        run: npm lint
 
     test:
       runs-on: ubuntu-latest
