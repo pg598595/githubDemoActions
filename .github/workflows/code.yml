@@ -13,11 +13,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Lint code
-        run: |
-          # Install linter
-          npm install -g eslint
+        run: npm install -g eslint
 
-          npm lint
+      - name: Run Lint
+        run: npm lint:fix
 
     test:
       runs-on: ubuntu-latest
