@@ -17,8 +17,7 @@ jobs:
           # Install linter
           npm install -g eslint
 
-          # Lint code
-          eslint .
+          npm lint
 
     test:
       runs-on: ubuntu-latest
